@@ -22,8 +22,8 @@ def one(img, temp):
 #ボックスが塗りつぶされているかを確認する関数
 def is_checked(img, left_x, left_y, right_x, right_y):
     #画素の値を調べる
-    #画像サイズは10x10なので、画素は１００個ある
-    thre = 60
+    #画像サイズは10x10なので、画素は100個ある
+    thre = 50
     black = 0
     white = 0
 
@@ -37,24 +37,27 @@ def is_checked(img, left_x, left_y, right_x, right_y):
         else:
             for _y in range(left_y, right_y):
                 #print img[_y][_x]
-                if img[_y][_x] == 0:
+                if img[_y][_x] <= 200: #200以下は塗られていると仮定
                     black+=1
 
-                elif img[_y][_x] == 255:
+                elif img[_y][_x] >= 200:
                     white+=1
 
                 else:
                     pass
 
-
-
-
 def mul(img, temp):
     template_width = temp.shape[0]
     template_height = temp.shape[1]
 
+    image_width = img.shape[0]
+    image_height = img.shape[1]
+
+    print img.shape
 
     box_pt = []
+    result = []
+
 
     matches = cv2.matchTemplate(img, temp, cv2.TM_CCORR_NORMED)
 
@@ -78,28 +81,43 @@ def mul(img, temp):
         print "Can't find marker correctly"
 
     else:
-        cv2.rectangle(img, box_pt[0], box_pt[3], (255,0,0), 1)
+        #cv2.rectangle(img, box_pt[0], box_pt[3], (255,0,0), 1)
 
         trim = img[box_pt[0][1]:box_pt[3][1], box_pt[0][0]:box_pt[3][0]]
+
+        print trim.shape
 
         new = cv2.cvtColor(trim, cv2.COLOR_RGB2GRAY)
 
         color = (0,0,0) #black
 
+        #for i in range(10):
+            #for k in range(5):
+                #cv2.rectangle(new, (200+20*k, 50+20*i), (210+20*k, 60+20*i), color, 1)
+
+        #cv2.rectangle(new, (200, 50), (210, 60), color, -1)
+
+        #print is_checked(new, 200, 50, 210, 60)
+        #print is_checked(new, 220, 50, 230, 60)
+
         for i in range(10):
+            result = []
             for k in range(5):
-                cv2.rectangle(new, (200+20*k, 50+20*i), (210+20*k, 60+20*i), color, 1)
+                if is_checked(new, 200+20*k, 50+20*i, 210+20*k, 60+20*i) == True:
+                    result.append(1)
 
-        cv2.rectangle(new, (200, 50), (210, 60), color, -1)
+                else:
+                    result.append(0)
 
-        print is_checked(new, 200, 50, 210, 60)
-        print is_checked(new, 220, 50, 230, 60)
+            print result
 
+
+        print result
         #print new.shape
-        cv2.imwrite("output.png", new)
+        #cv2.imwrite("output.png", new)
 
 def main():
-    img = cv2.imread("./format.png")
+    img = cv2.imread("./format1.png")
     temp = cv2.imread("./tmp.png")
 
     #one(img, temp)
